@@ -3,6 +3,8 @@
 using namespace std;
 
 
+// RECEPTEUR
+
 class Yogourt{
 
     public:
