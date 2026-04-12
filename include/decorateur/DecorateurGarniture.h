@@ -8,6 +8,8 @@ public:
 
 	virtual double obtenirPrix() const = 0;
 
+	virtual std::string obtenirDescription() const = 0;
+
 	virtual ~DecorateurGarniture() = default;
 
 protected:

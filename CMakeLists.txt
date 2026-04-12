@@ -11,4 +11,6 @@ file(GLOB_RECURSE SOURCES src/*.cpp)
 
 add_executable(TonYogourt ${SOURCES}
         include/stock/stock.h
-        src/stock/Stock.cpp)
+        src/stock/Stock.cpp
+        include/application/Application.h
+        src/application/Application.cpp)

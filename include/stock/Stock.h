@@ -7,7 +7,8 @@ class Stock
 
 public:
 	Stock();
-	void afficherStock();
+	void afficherStockInitial();
+	void afficherStockActuel();
 	void afficherGarnitures();
 	bool retirerDuStock(const std::string& ingredient);
 
