@@ -1,7 +1,6 @@
 #include <iostream>
 #include "../include/application/Application.h"
 #include "../include/ui/ConsoleColors.h"
-
 using namespace std;
 
 int main()
