@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 
 // -- TODO : Changer le nom de la classe du fichier et puis ajouter toutes les méthodes nécessaires pour cette composante 
 // Composante = Patron de conception, classe, etc etc

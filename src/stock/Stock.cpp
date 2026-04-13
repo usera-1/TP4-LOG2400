@@ -1,6 +1,7 @@
-#include <iostream>
 #include "../../include/stock/Stock.h"
 #include "../../include/ui/ConsoleColors.h"
+#include <iostream>
+using namespace std;
 
 Stock::Stock() {
 	stock_["nature"] = 3;
@@ -11,12 +12,14 @@ Stock::Stock() {
 	stock_["chocolat"] = 1;
 }
 
+
 void Stock::afficherStockInitial() {
 	for (auto& [ingredient,valeur]: stock_) {
 		std::cout << ConsoleColor::blue <<"[Stock] " << ConsoleColor::reset <<
 			ingredient << " : 0 → " << valeur << std::endl;
 	}
 }
+
 
 void Stock::afficherStockActuel() {
 	std::cout << ConsoleColor::blue << "Stocks: " << ConsoleColor::reset << std::endl;
@@ -33,6 +36,14 @@ void Stock::afficherGarnitures() {
 	std::cout << "	4 → chocolat (" << stock_.at("chocolat") << " en stock)\n";
 	std::cout << "	q → retour menu principal\n";
 }
+
+
+void Stock::ajouterAuStock(const std::string& ingredient) {
+    stock_[ingredient]++;
+    cout << "[Stock] " << ingredient << " restauré" << endl;
+}
+
+
 
 bool Stock::retirerDuStock(const std::string& ingredient) {
 

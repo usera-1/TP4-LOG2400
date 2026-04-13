@@ -1,5 +1,3 @@
-#include <iostream>
-#include <iomanip>
 #include "../include/ui/ConsoleColors.h"
 #include "../include/application/Application.h"
 #include "../include/decorateur/YogourtGrec.h"
@@ -8,7 +6,9 @@
 #include "../include/decorateur/Miel.h"
 #include "../include/decorateur/Granola.h"
 #include "../include/decorateur/Fruits.h"
-
+#include "../../include/commandes/AjouterGarnitureCommand.h"
+#include <iostream>
+#include <iomanip>
 using namespace std;
 
 Stock Application::obtenirStock() {
@@ -171,20 +171,17 @@ void Application::traiterCommandes(const std::string &commande) {
 				return;
 			};
 
-			Yogourt* y = listeYogourts_[yogourtActif_];
+			Yogourt* ancien = listeYogourts_[yogourtActif_];
+        	Yogourt* nouveau = nullptr;
 
-			if (nom == "fruits") {
-				listeYogourts_[yogourtActif_] = new Fruits(y);
-			}
-			else if (nom == "granola") {
-				listeYogourts_[yogourtActif_] = new Granola(y);
-			}
-			else if (nom == "miel") {
-				listeYogourts_[yogourtActif_] = new Miel(y);
-			}
-			else if (nom == "chocolat") {
-				listeYogourts_[yogourtActif_] = new Chocolat(y);
-			}
+			if (nom == "fruits")        nouveau = new Fruits(ancien);
+        	else if (nom == "granola")  nouveau = new Granola(ancien);
+        	else if (nom == "miel")     nouveau = new Miel(ancien);
+        	else if (nom == "chocolat") nouveau = new Chocolat(ancien);
+
+            auto cmd = make_shared<AjouterGarnitureCommand>(
+            listeYogourts_, yogourtActif_, nouveau, stock_, nom);
+        	invocateur_.executer(cmd);
 
 			cout << "Garniture " << nom << " ajoutee.\n";
 		}
@@ -194,6 +191,14 @@ void Application::traiterCommandes(const std::string &commande) {
 	else if (commande == "s") {
 		stock_.afficherStockActuel();
 	}
+
+	else if (commande == "u") {
+    invocateur_.annuler();
+	}
+
+	else if (commande == "r") {
+    	invocateur_.retablir();
+	}		
 
 	else {
 		cout << "Commande invalide\n";

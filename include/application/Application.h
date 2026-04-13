@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include "../decorateur/Yogourt.h"
+#include "../commandes/CommandManager.h"
 #include "../stock/Stock.h"
 
 class Application
@@ -18,4 +19,5 @@ private:
 	Stock stock_;
 	std::vector<Yogourt*> listeYogourts_;
 	int yogourtActif_ = -1;
+	Invocateur invocateur_;
 };

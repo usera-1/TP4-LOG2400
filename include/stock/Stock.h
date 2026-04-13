@@ -10,6 +10,7 @@ public:
 	void afficherStockInitial();
 	void afficherStockActuel();
 	void afficherGarnitures();
+	void ajouterAuStock(const std::string& ingredient);
 	bool retirerDuStock(const std::string& ingredient);
 
 private:
