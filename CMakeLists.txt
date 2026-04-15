@@ -13,4 +13,9 @@ add_executable(TonYogourt ${SOURCES}
         include/stock/stock.h
         src/stock/Stock.cpp
         include/application/Application.h
-        src/application/Application.cpp)
+        src/application/Application.cpp
+        include/etat/EtatCommande.h
+        include/etat/EtatInitiale.h
+        src/etat/EtatInitiale.cpp
+        include/strategie/IModePaiment.h
+        include/observateur/IObservateur.h)

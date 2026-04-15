@@ -1,208 +1,81 @@
-#include "../include/ui/ConsoleColors.h"
-#include "../include/application/Application.h"
-#include "../include/decorateur/YogourtGrec.h"
-#include "../include/decorateur/YogourtNature.h"
-#include "../include/decorateur/Chocolat.h"
-#include "../include/decorateur/Miel.h"
-#include "../include/decorateur/Granola.h"
-#include "../include/decorateur/Fruits.h"
-#include "../../include/commandes/AjouterGarnitureCommand.h"
+#include "../../include/application/Application.h"
+#include "../../include/etat/EtatCommande.h"
+#include "../../include/etat/EtatInitiale.h"
 #include <iostream>
-#include <iomanip>
+
 using namespace std;
 
-Stock Application::obtenirStock() {
-	return stock_;
+Application::Application() : yogourtActif_(-1), modePaiement_(nullptr) {
+    etatActuel_ = make_unique<EtatInitiale>();
+}
+
+Application::~Application() = default;
+
+void Application::changerEtat(std::unique_ptr<EtatCommande> nouvelEtat) {
+    if (nouvelEtat) {
+        etatActuel_ = std::move(nouvelEtat);
+    }
 }
 
 double Application::calculerSousTotal() const {
-	double sousTotal = 0.0;
-
-	for (Yogourt* y: listeYogourts_) {
-		if (y != nullptr) {
-			sousTotal += y->obtenirPrix();
-		}
-	}
-	return sousTotal;
+    double total = 0.0;
+    // On parcourt la liste des yogourts et on appelle calculerPrix() de chacun
+    for (auto* yogourt : listeYogourts_) {
+        if (yogourt != nullptr) {
+            total += yogourt->obtenirPrix();
+        }
+    }
+    return total;
 }
 
-void Application::afficherEtatCommandes() {
-	cout << "\nPhase:" << endl;
+void Application::traiterCommandes(const string &commande) {
+    if (commande == "s") {
+        stock_.afficherStockActuel();
+    }
+    else if (commande == "u") {
+        invocateur_.annuler();
+    }
+    else if (commande == "r") {
+        invocateur_.retablir();
+    }
+    else if (commande == "sub") {
+        string nom, ingredient;
+        cout << "Nom de l'abonne : "; cin >> nom;
+        cout << "Ingredient a surveiller : "; cin >> ingredient;
 
-	if (listeYogourts_.empty()) {
-		cout << "Yogourts: aucun\n" << "Sous-total commande: 0.00 CAD"<< endl;
-	}
-	else {
-		std::cout << std::fixed << std::setprecision(2);
+        auto nouvelAbonne = make_unique<Abonne>(nom);
+        stock_.abonner(ingredient, nouvelAbonne.get());
+        abonnes_.push_back(std::move(nouvelAbonne));
 
-		for (int i = 0; i < listeYogourts_.size(); i++) {
-
-			cout << "Yogourts #" << i + 1;
-
-			if (i == yogourtActif_) {
-				cout << " (actif)";
-			}
-
-			cout << ": " << listeYogourts_[i]->obtenirDescription() << " | Prix: " << listeYogourts_[i]->obtenirPrix()
-			<< " CAD"<< endl;
-
-		}
-		cout << "Sous-total commande: " << calculerSousTotal() <<" CAD"<< endl;
-	}
-	cout << "Paiement: Aucune | "<< ConsoleColor::yellow << "choisir un mode de paiement" << ConsoleColor::reset <<
-		" | " << ConsoleColor::red << "non payable" << ConsoleColor::reset << endl;
-
+        cout << "[Systeme] " << nom << " est abonne aux alertes pour '" << ingredient << "'." << endl;
+    }
+    else if (etatActuel_) {
+        if (commande == "c") {
+            etatActuel_->ajouterYogourt(*this, "nature");
+        }
+        else if (commande == "p") {
+            etatActuel_->preparer(*this);
+        }
+        else if (commande == "t") {
+            etatActuel_->terminer(*this);
+        }
+        else if (commande == "pay") {
+            etatActuel_->payer(*this);
+        }
+        else {
+            cout << "Commande '" << commande << "' inconnue." << endl;
+        }
+    }
 }
 
 void Application::afficherCommandes() {
-	cout << left;
-	cout << ConsoleColor::cyan <<"Bienvenue sur TonYogourt" << ConsoleColor::reset << endl;
-	cout << ConsoleColor::blue <<"Commandes:" << ConsoleColor::reset << endl;
-	cout << setw(30) << "	c nature|grec" << "→  Ajouter un yogourt (max 2)" << endl;
-	cout << setw(30) << "	sel 1|2" << "→  Selectionner le yogourt actif" << endl;
-	cout << setw(30) << "	f" << "→  Ouvrir menu garnitures du yogourt actif" << endl;
-	cout << setw(30) << "	u" << "→  Annuler derniere garniture du yogourt actif" << endl;
-	cout << setw(30) << "	r" << "→  Refaire derniere garniture du yogourt actif" << endl;
-	cout << setw(30) << "	p" << "→  Preparer la commande" << endl;
-	cout << setw(30) << "	t" << "→  Terminer la commande" << endl;
-	cout << setw(30) << "	mode prev|eclair|poly " << "→  Changer le mode paiement" << endl;
-	cout << setw(30) << "	pay" << "→  Finaliser paiement (etat Terminee requis)" << endl;
-	cout << setw(30) << "	pay prev|eclair|poly " << "→  Alias mode + payer" << endl;
-	cout << setw(30) << "	total" << "→  Afficher sous-total et total projete" << endl;
-	cout << setw(30) << "	sub article" << "→  S'abonner au notifications d'un article" << endl;
-	cout << setw(30) << "	unsub article" << "→  Se desabonner d'un article" << endl;
-	cout << setw(30) << "	subs" << "→  Afficher abonnements actifs" << endl;
-	cout << setw(30) << "	clear|cls" << "→  Nettoyer ecran" << endl;
-	cout << setw(30) << "	s"<<"→  Afficher stocks" << endl;
-	cout << setw(30) << "	h"<<"→  Aide" << endl;
-	cout << setw(30) << "	q"<<"→  Quitter" << endl;
+    cout << "\n--- MENU ---" << endl;
+    cout << "c : Ajouter | sub : S'abonner | s : Stock | p : Preparer | t : Terminer | pay : Payer | u/r : Undo/Redo" << endl;
 }
 
-
-void Application::traiterCommandes(const std::string &commande) {
-
-	// cout << "\n";
-	if (commande == "c") {
-		std::string typeYogourt;
-		std::cin >> typeYogourt;
-
-		if (listeYogourts_.size() >= NB_YOGOURT_MAX) {
-			cout << "Un maximum de 2 yogourts par commande est permis" << endl;
-			return;
-		}
-
-		if (stock_.retirerDuStock(typeYogourt) == false) return;
-
-		if (typeYogourt == "grec") {
-			listeYogourts_.push_back(new YogourtGrec());
-		}
-		else if (typeYogourt == "nature") {
-			listeYogourts_.push_back(new YogourtNature());
-		}
-		else {
-			cout << "Type yogourt invalide" << endl;
-		}
-
-		yogourtActif_ = listeYogourts_.size() - 1;
-
-		cout << "Yogourt " << typeYogourt << " selectionne." << endl;
-
-	}
-
-	else if ( commande == "sel") {
-		int index;
-		std::cin >> index;
-
-		if (listeYogourts_.empty()) {
-			cout << "Aucun yogourt disponible\n";
-			return;
-		}
-
-		if (index < 1 || index > listeYogourts_.size()) {
-			cout << "Selection invalide\n";
-			return;
-		}
-		if (index == 2 && listeYogourts_.size() < NB_YOGOURT_MAX) {
-			cout << "Seulement un yogourt est actif\n";
-		}
-
-		yogourtActif_ = index - 1;
-		cout << "yogourt actif = " << yogourtActif_ << endl;  // debug en attendant le reste du code
-	}
-
-	else if ( commande == "f") {
-
-		bool selectionGarnituresTermine = false;
-		if (yogourtActif_ == -1) {
-			cout << "Yogourts: aucun" << endl;
-			return;
-		}
-
-		while (!selectionGarnituresTermine) {
-
-			cout << ConsoleColor::blue << "\nMenu Garnitures\n" << ConsoleColor::reset <<
-				"	Yogourt actif: #" << yogourtActif_ + 1<< endl;
-
-			stock_.afficherGarnitures();
-
-			cout << ConsoleColor::magenta << "Choix garnitures: " << ConsoleColor::reset;
-
-			string garniture;
-			std::cin >> garniture;
-
-			string nom;
-
-			if (garniture == "1") nom = "fruits";
-			else if (garniture == "2") nom = "granola";
-			else if (garniture == "3") nom = "miel";
-			else if (garniture == "4") nom = "chocolat";
-			else if (garniture == "q") {
-				cout << ConsoleColor::blue << "Retour au menu principal" << ConsoleColor::reset << endl;
-				selectionGarnituresTermine = true;
-				return;
-			}
-			else {
-				cout << "Choix invalide\n";
-				return;
-			}
-
-			if (!stock_.retirerDuStock(nom)) {
-				cout << "Stock insuffisant pour la garniture '" << nom << "'" << endl;
-				return;
-			};
-
-			Yogourt* ancien = listeYogourts_[yogourtActif_];
-        	Yogourt* nouveau = nullptr;
-
-			if (nom == "fruits")        nouveau = new Fruits(ancien);
-        	else if (nom == "granola")  nouveau = new Granola(ancien);
-        	else if (nom == "miel")     nouveau = new Miel(ancien);
-        	else if (nom == "chocolat") nouveau = new Chocolat(ancien);
-
-            auto cmd = make_shared<AjouterGarnitureCommand>(
-            listeYogourts_, yogourtActif_, nouveau, stock_, nom);
-        	invocateur_.executer(cmd);
-
-			cout << "Garniture " << nom << " ajoutee.\n";
-		}
-
-	}
-
-	else if (commande == "s") {
-		stock_.afficherStockActuel();
-	}
-
-	else if (commande == "u") {
-    invocateur_.annuler();
-	}
-
-	else if (commande == "r") {
-    	invocateur_.retablir();
-	}		
-
-	else {
-		cout << "Commande invalide\n";
-		return;
-	}
+void Application::afficherEtatCommandes() {
+    if (etatActuel_) {
+        cout << "Etat actuel : " << etatActuel_->obtenirNom() << endl;
+        cout << "Sous-total actuel : " << calculerSousTotal() << " $" << endl;
+    }
 }
-

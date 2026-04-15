@@ -8,6 +8,7 @@ public:
     void retirerGarniture(const string& garniture);
     void afficherGarniture();
 
+
 private:
     vector<string> garnitures;
 };

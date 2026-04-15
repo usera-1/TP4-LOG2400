@@ -1,68 +1,90 @@
 #include "../../include/stock/Stock.h"
 #include "../../include/ui/ConsoleColors.h"
 #include <iostream>
+
 using namespace std;
 
 Stock::Stock() {
-	stock_["nature"] = 3;
-	stock_["grec"] = 1;
-	stock_["fruits"] = 5;
-	stock_["granola"] = 4;
-	stock_["miel"] = 4;
-	stock_["chocolat"] = 1;
+    stock_["nature"] = 3;
+    stock_["grec"] = 1;
+    stock_["fruits"] = 5;
+    stock_["granola"] = 4;
+    stock_["miel"] = 4;
+    stock_["chocolat"] = 1;
 }
 
+void Stock::abonner(const string& article, IObservateur* obs) {
+    abonnements_[article].push_back(obs);
+}
+
+void Stock::desabonner(const string& article, IObservateur* obs) {
+    if (abonnements_.count(article)) {
+        auto& liste = abonnements_[article];
+        for (auto it = liste.begin(); it != liste.end(); ++it) {
+            if (*it == obs) {
+                liste.erase(it);
+                break;
+            }
+        }
+    }
+}
+
+void Stock::notifier(const string& article) {
+    if (abonnements_.count(article)) {
+        for (auto* obs : abonnements_[article]) {
+            obs->miseAJour(article);
+        }
+    }
+}
 
 void Stock::afficherStockInitial() {
-	for (auto& [ingredient,valeur]: stock_) {
-		std::cout << ConsoleColor::blue <<"[Stock] " << ConsoleColor::reset <<
-			ingredient << " : 0 → " << valeur << std::endl;
-	}
+    for (auto const& [ingredient, valeur] : stock_) {
+        cout << ConsoleColor::blue << "[Stock] " << ConsoleColor::reset <<
+             ingredient << " : 0 → " << valeur << endl;
+    }
 }
-
 
 void Stock::afficherStockActuel() {
-	std::cout << ConsoleColor::blue << "Stocks: " << ConsoleColor::reset << std::endl;
-	for (auto& [ingredient,valeur]: stock_) {
-		std::cout << "	"<<ingredient << " : " << valeur << std::endl;
-	}
+    cout << ConsoleColor::blue << "Stocks actuels: " << ConsoleColor::reset << endl;
+    for (auto const& [ingredient, valeur] : stock_) {
+        cout << " " << ingredient << " : " << valeur << endl;
+    }
 }
-
 
 void Stock::afficherGarnitures() {
-	std::cout << "	1 → fruits (" << stock_.at("fruits") << " en stock)\n";
-	std::cout << "	2 → granola (" << stock_.at("granola") << " en stock)\n";
-	std::cout << "	3 → miel (" << stock_.at("miel") << " en stock)\n";
-	std::cout << "	4 → chocolat (" << stock_.at("chocolat") << " en stock)\n";
-	std::cout << "	q → retour menu principal\n";
+    cout << " 1 → fruits (" << stock_.at("fruits") << " en stock)\n";
+    cout << " 2 → granola (" << stock_.at("granola") << " en stock)\n";
+    cout << " 3 → miel (" << stock_.at("miel") << " en stock)\n";
+    cout << " 4 → chocolat (" << stock_.at("chocolat") << " en stock)\n";
+    cout << " q → retour menu principal\n";
 }
 
-
-void Stock::ajouterAuStock(const std::string& ingredient) {
+void Stock::ajouterAuStock(const string& ingredient) {
     stock_[ingredient]++;
-    cout << "[Stock] " << ingredient << " restauré" << endl;
+    cout << "[Stock] " << ingredient << " restaure" << endl;
 }
 
+bool Stock::retirerDuStock(const string& ingredient) {
+    auto it = stock_.find(ingredient);
+    if (it == stock_.end()) {
+        cout << "Ingredient inexistant" << endl;
+        return false;
+    }
 
+    if (it->second <= 0) {
+        cout << "Stock insuffisant pour " << ingredient << endl;
+        notifier(ingredient);
+        return false;
+    }
 
-bool Stock::retirerDuStock(const std::string& ingredient) {
+    cout << ConsoleColor::blue << "[Stock] " << ConsoleColor::reset <<
+         ingredient << " : " << it->second << " → " << it->second - 1 << endl;
 
-	auto ing = stock_.find(ingredient);
-	if (ing == stock_.end()) {
-		std::cout << "Ingredient inexistant" << std::endl;
-		return false;
-	}
-	if (ing->second <= 0) {
-		std::cout << "Stock insuffisant pour " << ingredient << std::endl;
-		return false;
-	}
+    it->second--;
 
-	std::cout << ConsoleColor::blue <<"[Stock] " << ConsoleColor::reset <<
-		ingredient << " : " << ing->second << "→" << ing->second - 1 << std::endl;
+    if (it->second == 0) {
+        notifier(ingredient);
+    }
 
-	ing->second--;
-
-	return true;
-
+    return true;
 }
-
