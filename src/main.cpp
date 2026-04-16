@@ -11,7 +11,7 @@ int main()
 
     app.afficherCommandes();
 
-    while (true) {
+    while (!app.obtenirEstPaiementTerminee()) {
         app.afficherEtatCommandes();
         cout << ConsoleColor::magenta << "Commande: " << ConsoleColor::reset;
         string cmd;

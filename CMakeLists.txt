@@ -17,5 +17,8 @@ add_executable(TonYogourt ${SOURCES}
         include/etat/EtatCommande.h
         include/etat/EtatInitiale.h
         src/etat/EtatInitiale.cpp
-        include/strategie/IModePaiment.h
-        include/observateur/IObservateur.h)
+        include/observateur/IObservateur.h
+        include/etat/EtatPreparation.h
+        include/etat/EtatTerminee.h
+        src/etat/EtatPreparation.cpp
+        src/etat/EtatTerminee.cpp)

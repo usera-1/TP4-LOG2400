@@ -16,9 +16,12 @@ public:
 	void afficherGarnitures();
 	void ajouterAuStock(const std::string& ingredient);
 	bool retirerDuStock(const std::string& ingredient);
+	void afficherAbonnements();
+	bool estDisponible(const std::string& ingredient) const;
 
 	// Méthodes du pattern Observateur
 	void abonner(const std::string& article, IObservateur* obs);
 	void desabonner(const std::string& article, IObservateur* obs);
 	void notifier(const std::string& article);
+	void notifierRetourArticle(const std::string& article);
 };

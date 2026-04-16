@@ -8,7 +8,7 @@
 #include "../observateur/IObservateur.h"
 
 class EtatCommande;
-class IModePaiement;
+class StrategiePaiement;
 
 class Application
 {
@@ -19,6 +19,7 @@ public:
 	static void afficherCommandes();
 	void traiterCommandes(const std::string& commande);
 	void afficherEtatCommandes();
+	std::vector<Yogourt*> obtenirListeYogourts();
 
 	// Pour l'observateur
 	Stock& obtenirStock() { return stock_; }
@@ -27,7 +28,8 @@ public:
 	double calculerSousTotal() const;
 
 	void changerEtat(std::unique_ptr<EtatCommande> nouvelEtat);
-	void setModePaiement(IModePaiement* mode);
+	bool changementStrategiePaiement(const std::string& type);
+	bool obtenirEstPaiementTerminee() {return estPaiementTerminee_;}
 
 private:
 	static const int NB_YOGOURT_MAX = 2;
@@ -38,8 +40,11 @@ private:
 
 	// Utilisation de unique_ptr pour la gestion automatique de la mémoire
 	std::unique_ptr<EtatCommande> etatActuel_;
-	IModePaiement* modePaiement_;
+	StrategiePaiement* modePaiement_;
+	std::string nomModePaiement_ = "Aucune";
 
 	// Vecteur pour garder les abonnés en vie
 	std::vector<std::unique_ptr<IObservateur>> abonnes_;
+
+	bool estPaiementTerminee_ = false;
 };

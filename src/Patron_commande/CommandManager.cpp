@@ -18,9 +18,10 @@ using namespace std;
             commandesFaites.pop_back();
             commande->annuler();
             commandesAnnulees.push_back(commande);
+            cout << "Derniere garniture annulee.\n";
             return;
         }      
-        cout << "Rien à annuler" << endl; 
+        cout << "Aucune garniture a annuler." << endl;
     }
 
 
@@ -30,6 +31,7 @@ using namespace std;
             commandesAnnulees.pop_back();
             cmd->executer();
             commandesFaites.push_back(cmd);
+            cout << "Garniture retablie.\n";
             return;
         }
         cout << "Rien à rétablir." << endl;

@@ -13,6 +13,20 @@ Stock::Stock() {
     stock_["chocolat"] = 1;
 }
 
+void Stock::afficherAbonnements() {
+
+    if (abonnements_.empty()) {
+        std::cout<< " - aucun " << endl;
+    }
+
+    for (const auto& [arcticle, liste]: abonnements_) {
+        if (!liste.empty()) {
+            std::cout << " - "<< arcticle << endl;
+        }
+    }
+}
+
+
 void Stock::abonner(const string& article, IObservateur* obs) {
     abonnements_[article].push_back(obs);
 }
@@ -37,6 +51,16 @@ void Stock::notifier(const string& article) {
     }
 }
 
+
+void Stock::notifierRetourArticle(const string& article) {
+    if (abonnements_.count(article)) {
+        for (auto* obs : abonnements_[article]) {
+            std::cout << ConsoleColor::cyan <<"[Notif Abonne] '"
+            << ConsoleColor::reset<< article << "' est de retour en stock." << std::endl;
+        }
+    }
+}
+
 void Stock::afficherStockInitial() {
     for (auto const& [ingredient, valeur] : stock_) {
         cout << ConsoleColor::blue << "[Stock] " << ConsoleColor::reset <<
@@ -52,19 +76,24 @@ void Stock::afficherStockActuel() {
 }
 
 void Stock::afficherGarnitures() {
-    cout << " 1 → fruits (" << stock_.at("fruits") << " en stock)\n";
-    cout << " 2 → granola (" << stock_.at("granola") << " en stock)\n";
-    cout << " 3 → miel (" << stock_.at("miel") << " en stock)\n";
-    cout << " 4 → chocolat (" << stock_.at("chocolat") << " en stock)\n";
-    cout << " q → retour menu principal\n";
+    cout << "   1 → fruits (" << stock_.at("fruits") << " en stock)\n";
+    cout << "   2 → granola (" << stock_.at("granola") << " en stock)\n";
+    cout << "   3 → miel (" << stock_.at("miel") << " en stock)\n";
+    cout << "   4 → chocolat (" << stock_.at("chocolat") << " en stock)\n";
+    cout << "   q → retour menu principal\n";
 }
 
 void Stock::ajouterAuStock(const string& ingredient) {
-    stock_[ingredient]++;
-    cout << "[Stock] " << ingredient << " restaure" << endl;
+    // stock_[ingredient]++;
+    if (stock_[ingredient] == 0) {
+        notifierRetourArticle(ingredient);
+    }
+
+    cout << ConsoleColor::blue << "[Stock] " << ConsoleColor::reset
+       << ingredient << " : "<< stock_[ingredient]<< " -> "  << ++stock_[ingredient]<< endl;
 }
 
-bool Stock::retirerDuStock(const string& ingredient) {
+bool Stock::retirerDuStock(const string &ingredient) {
     auto it = stock_.find(ingredient);
     if (it == stock_.end()) {
         cout << "Ingredient inexistant" << endl;
@@ -72,7 +101,7 @@ bool Stock::retirerDuStock(const string& ingredient) {
     }
 
     if (it->second <= 0) {
-        cout << "Stock insuffisant pour " << ingredient << endl;
+        cout << "Stock insuffisant pour '" << ingredient <<"'" << endl;
         notifier(ingredient);
         return false;
     }
@@ -87,4 +116,14 @@ bool Stock::retirerDuStock(const string& ingredient) {
     }
 
     return true;
+}
+
+bool Stock::estDisponible(const string& ingredient) const {
+    auto it = stock_.find(ingredient);
+
+    if (it == stock_.end()) {
+        return false;
+    }
+
+    return it->second > 0;
 }

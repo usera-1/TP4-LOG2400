@@ -1,9 +1,4 @@
-//
-// Created by massylia aggoun on 2026-04-15.
-//
-
-#ifndef TONYOGOURT_ETATCOMMANDE_H
-#define TONYOGOURT_ETATCOMMANDE_H
+#pragma once
 
 #include "application/Application.h"
 
@@ -16,7 +11,7 @@ public:
     virtual void preparer(Application& app) {}
     virtual void terminer(Application& app) {}
     virtual void payer(Application& app) {}
-    virtual std::string obtenirNom() const { return "Etat Inconnu"; }
+    virtual std::string obtenirNom() const {return "";}
 };
 
-#endif //TONYOGOURT_ETATCOMMANDE_H
+

@@ -13,11 +13,12 @@ class Abonne : public IObservateur {
 private:
     std::string nom_;
 public:
+    Abonne() = default;
     Abonne(const std::string& nom) : nom_(nom) {}
     
     void miseAJour(const std::string& article) override {
         // Utilisation de std::endl et std::cout pour éviter les erreurs de namespace
-        std::cout << "\n[Notif Abonne] Bonjour " << nom_ 
+        std::cout << "[Notif Abonne] Bonjour " << nom_
                   << ", rupture de stock detectee pour '" << article << "'." << std::endl;
     }
     
